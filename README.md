@@ -80,7 +80,7 @@
   "id": long,                                    // ID SKU
   "characteristics": CharacteristicMapping[],    // Соотношение характеристик к SKU (см. пример)
   "availableAmount": int,                        // Кол-во, доступное к покупке для данного SKU или выбранных характеристик
-  "price": int                                   // Cтоимость выбранной вариации SKU в рублях
+  "price": float                                 // Cтоимость выбранной вариации SKU в рублях
 }
 ```
 
