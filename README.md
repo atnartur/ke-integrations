@@ -13,6 +13,10 @@
     * [ Пример фида ](#example)
 3. [ Работа с заказами ](#order)
     * [ Создание заказа ](#create)
+    * [ Обновление статуса платежа ](#payment)
+    * [ Получение заказа ](#order)
+    * [ Статусы заказа ](#statuses)
+4. [ Коды ответов ](#responses)
 
 ---
 <a name="dto"></a>
@@ -221,7 +225,7 @@
 Пример передачи авторизации для токена: `912e8227-677f-431e-b74c-988cba313772`
 
 ```
-GET https://URL/order/
+GET https://URL/api/partner/order/
 Accept: application/json
 Authorization: Bearer 912e8227-677f-431e-b74c-988cba313772
 Cache-Control: no-cache
@@ -233,7 +237,7 @@ Content-Type: application/json;charset=UTF-8;
 #### Размещение заказа на площадке
 Пример запроса: 
 ```
-POST https://kazanexpress.ru/api/order
+POST https://kazanexpress.ru/api/partner/order
 Cache-Control: no-cache
 Content-Type: application/json
 Authorization: Bearer %TOKEN%
@@ -297,7 +301,7 @@ Authorization: Bearer %TOKEN%
 
 Успешное создание заказа:
 ```
-POST https://kazanexpress.ru/api/order
+POST https://kazanexpress.ru/api/partner/order
 
 HTTP/1.1 200 OK
 Server: nginx/1.15.6
@@ -305,7 +309,10 @@ Content-encoding: gzip
 Content-Type: application/json;charset=UTF-8
 
 {
-    "error": null,
+    "status": {
+        "code": 0,
+        "message": "Success"
+    },
     "payload": {
         "orderId": 129709,
         "status": "CREATED",
@@ -330,7 +337,7 @@ Content-Type: application/json;charset=UTF-8
 
 Неуспешное создание заказа:
 ```
-POST https://kazanexpress.ru/api/order
+POST https://kazanexpress.ru/api/partner/order
 
 HTTP/1.1 200 OK
 Server: nginx/1.15.6
@@ -338,7 +345,7 @@ Content-encoding: gzip
 Content-Type: application/json;charset=UTF-8
 
 {
-    "error": {
+    "status": {
         "code": 11,
         "message": "Some items from the order ran out of stock"
     },
@@ -355,9 +362,9 @@ Content-Type: application/json;charset=UTF-8
 
 ##### Поля в ответе
 
-* **error** - поле содержащее описание ошибки
-    * **code** - статус код ошибки, служит для быстрого определения ошибки
-    * **message** - краткое описание ошибки, на английском
+* **status** - содержит статус ответа или ошибки
+    * **code** - статус/код ошибки, служит для быстрого определения типа ответа. Все **ненулевые статусы** считаются ошибкой
+    * **message** - краткое описание статуса, на английском
 * **payload** - содержит основную информацию в ответе
     * **orderId** - идентификатор успешно созданного заказа
     * **status** - статус заказа
@@ -376,3 +383,120 @@ Content-Type: application/json;charset=UTF-8
 
 * Код *** - цена не совпадает с ценой для покупки. В данном случае в ответе придет массив orderItems, 
 содержащий все позиции в заказе с несовпадающей ценой.
+
+<a name="payment"></a>
+#### Изменение статуса оплаты для заказа
+Пример запроса на подтверждение платежа: 
+```
+POST https://kazanexpress.ru/api/partner/payment
+Cache-Control: no-cache
+Content-Type: application/json
+Authorization: Bearer %TOKEN%
+
+{
+    "paymentId": 1551,
+    "amount": 120.0,
+    "orderId": 129709,
+    "status": "confirmed"
+}
+```
+
+Пример запроса на отмену платежа: 
+```
+POST https://kazanexpress.ru/api/partner/payment
+Cache-Control: no-cache
+Content-Type: application/json
+Authorization: Bearer %TOKEN%
+
+{
+    "paymentId": 1551,
+    "orderId": 129709,
+    "status": "canceled"
+}
+```
+
+##### Поля
+
+* **paymentId*** - идентификатор платежа в платежной системе
+* **amount** - полная сумма оплаты
+* **orderId*** - идентификатор заказа, который был оплачен
+* **status*** - статус оплаты, возможные значение `confirmed`, `canceled`
+    * `confirmed` - платеж успешно оплачен
+    * `canceled` - платеж отменен со стороны платежной системы, клиента, партнера
+
+##### Пример ответа
+```
+POST https://kazanexpress.ru/api/partner/payment
+
+HTTP/1.1 200 OK
+Server: nginx/1.15.6
+Content-encoding: gzip
+Content-Type: application/json;charset=UTF-8
+
+{
+    "status": {
+        "code": 0,
+        "message": "Success"
+    },
+    "payload": null
+}
+```
+
+
+<a name="order"></a>
+#### Получение заказа
+Пример запроса
+```
+GET https://kazanexpress.ru/api/partner/order/{{orderId}}
+Cache-Control: no-cache
+Content-Type: application/json
+Authorization: Bearer %TOKEN%
+
+```
+
+* **orderId** - идентификатор заказа в системе KazanExpress
+
+##### Пример ответа
+```
+GET https://kazanexpress.ru/api/partner/order/{{orderId}}
+
+HTTP/1.1 200 OK
+Server: nginx/1.15.6
+Content-encoding: gzip
+Content-Type: application/json;charset=UTF-8
+
+{
+    "status": {
+        "code": 0,
+        "message": "Success"
+    },
+    "payload": {
+        "orderId": 129709,
+        "status": "CREATED",
+        "price": 120.0,
+        "orderItems": [
+            {
+                "orderItemId": 240,
+                "skuId": 143,
+                "purchasePrice": 30.0,
+                "amount": 2
+            },
+            {
+                "orderItemId": 241,
+                "skuId": 1664,
+                "purchasePrice": 60.0,
+                "amount": 1
+            }
+        ]
+    }
+}
+```
+
+<a name="statuses"></a>
+#### Возможные статусы заказа
+* **CREATED** - создан, не оплачен
+* **ACTIVE** - оплачен, принят в обработку
+* **PACKED** - собран на складе, готовится к отправке
+* **DELIVERING** - доставляется до клиента
+* **DELIVERED** - доставлен до пункта выдачи KazanExpress
+* **COMPLETED** - выдан покупателю
