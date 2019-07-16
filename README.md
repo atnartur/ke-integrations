@@ -225,7 +225,7 @@
 Пример передачи авторизации для токена: `912e8227-677f-431e-b74c-988cba313772`
 
 ```
-GET https://URL/api/partner/order/
+GET https://kazanexpress.ru/api/partner/order/
 Accept: application/json
 Authorization: Bearer 912e8227-677f-431e-b74c-988cba313772
 Cache-Control: no-cache
