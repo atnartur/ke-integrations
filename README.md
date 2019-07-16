@@ -4,13 +4,15 @@
 ---
 ## Содержание
 1. [ Объекты передачи данных ](#dto)
-  * [ Category ](#category)
-  * [ Characteristic ](#characteristic)
-  * [ CharacteristicMapping ](#characteristic_mapping)
-  * [ Photo ](#photo)
+    * [ Category ](#category)
+    * [ Characteristic ](#characteristic)
+    * [ CharacteristicMapping ](#characteristic_mapping)
+    * [ Photo ](#photo)
 2. [ Товарные фиды ](#feeds)
-  * [ Формат содержимого ](#format)
-  * [ Пример фида ](#example)
+    * [ Формат содержимого ](#format)
+    * [ Пример фида ](#example)
+3. [ Работа с заказами ](#order)
+    * [ Создание заказа ](#create)
 
 ---
 <a name="dto"></a>
@@ -210,4 +212,167 @@
 }
 ```
 ---
+<a name="order"></a>
+### Работа с заказами на площадке
 
+1. Заказ должен быть размещен на площадке и в РСХБ одновременно, не должно возникать ситуаций, когда заказ есть в одной из систем и нет в другой.
+2. На площадке присутствует авторизация. Вам выдан токен, который надо передавать вместе с каждым запросом.
+
+Пример передачи авторизации для токена: `912e8227-677f-431e-b74c-988cba313772`
+
+```
+GET https://URL/order/
+Accept: application/json
+Authorization: Bearer 912e8227-677f-431e-b74c-988cba313772
+Cache-Control: no-cache
+Content-Type: application/json;charset=UTF-8;
+
+```
+
+<a name="create"></a>
+#### Размещение заказа на площадке
+Пример запроса: 
+```
+POST https://kazanexpress.ru/api/order
+Cache-Control: no-cache
+Content-Type: application/json
+Authorization: Bearer %TOKEN%
+
+{
+    "price": 120.0,
+    "comment": "",
+    "contacts": {
+        "name": "Владимир",
+        "lastName": "Иванов",
+        "email": "v.ivanov@mail.ru",
+        "phone": "9998887766"
+    },
+    "delivery": {
+        "type": "postmail",
+        "cityName": "Казань",
+        "address": "ул. Туктамышева, д. 14, кв. 132",
+        "zipCode": 462400
+    },
+    "orderItems": [
+        {
+            "skuId": 143,
+            "purchasePrice": 30.0,
+            "amount": 2
+        },
+        {
+            "skuId": 1664,
+            "purchasePrice": 60.0,
+            "amount": 1
+        }
+    ]
+}
+```
+
+##### Поля
+
+* **price*** - общая цена заказа в рублях
+* **comment** - комментарий к заказу
+* **contacts*** - контактные данные покупателя
+    * **name*** - имя
+    * **lastName*** - фамилия
+    * **phone** - телефон
+    * **email** - адрес электронной почты
+* **delivery*** - информация о доставке
+    * **type*** - обязательное поле, содержит один из двух видов типа доставки:
+        * **post** - доставка Почтой России
+        * **deliveryPoint** - доставка до пункта выдачи заказов KazanExpress
+    * **cityName*** - название города получателя
+    * **address** - обязательное поле для типа **post**, адрес получателя
+    * **zipCode** - обязательное поле для типа **post**, почтовый индекс получателя
+    * **cityId** - обязательное поле для типа **deliveryPoint**, идентификатор города получателя в системе KazanExpress
+    * **deliveryPointId** - обязательное поле для типа **deliveryPoint**, идентификатор пункта выдачи в системе KazanExpress
+* **orderItems*** - не пустой массив позиций в заказе
+    * **skuId*** - идентификатор СКУ в системе KazanExpress
+    * **purchasePrice*** - цена покупки в рублях
+    * **amount*** - количество товара
+    
+Все поля, помеченные звездочкой, являются обязательными.
+
+##### Пример ответа
+
+Успешное создание заказа:
+```
+POST https://kazanexpress.ru/api/order
+
+HTTP/1.1 200 OK
+Server: nginx/1.15.6
+Content-encoding: gzip
+Content-Type: application/json;charset=UTF-8
+
+{
+    "error": null,
+    "payload": {
+        "orderId": 129709,
+        "status": "CREATED",
+        "price": 120.0,
+        "orderItems": [
+            {
+                "orderItemId": 240,
+                "skuId": 143,
+                "purchasePrice": 30.0,
+                "amount": 2
+            },
+            {
+                "orderItemId": 241,
+                "skuId": 1664,
+                "purchasePrice": 60.0,
+                "amount": 1
+            }
+        ]
+    }
+}
+```
+
+Неуспешное создание заказа:
+```
+POST https://kazanexpress.ru/api/order
+
+HTTP/1.1 200 OK
+Server: nginx/1.15.6
+Content-encoding: gzip
+Content-Type: application/json;charset=UTF-8
+
+{
+    "error": {
+        "code": 11,
+        "message": "Some items from the order ran out of stock"
+    },
+    "payload": {
+        "orderItems": [
+            {
+                "skuId": 143,
+                "availableAmount": 1
+            }
+        ]
+    }
+}
+```
+
+##### Поля в ответе
+
+* **error** - поле содержащее описание ошибки
+    * **code** - статус код ошибки, служит для быстрого определения ошибки
+    * **message** - краткое описание ошибки, на английском
+* **payload** - содержит основную информацию в ответе
+    * **orderId** - идентификатор успешно созданного заказа
+    * **status** - статус заказа
+    * **price** - общая сумма к оплате
+    * **orderItems** - позиции заказа
+        * **orderItemId** - идентификатор позиции заказа
+        * **skuId** - идентификатор СКУ в системе
+        * **purchasePrice** - сумма к оплате за одну штуку, в рублях
+        * **amount** - количество
+        * **availableAmount**: количество СКУ оставшееся на складе
+        
+Возможно следующие ошибки:
+
+* Код *** - количество указанное в заказе больше, чем кол-во доступное для заказа, 
+в таком слуае в ответе придет массив orderItems, содержащий максимально возможное кол-во товара для заказа.
+
+* Код *** - цена не совпадает с ценой для покупки. В данном случае в ответе придет массив orderItems, 
+содержащий все позиции в заказе с несовпадающей ценой.
