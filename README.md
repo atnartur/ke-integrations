@@ -106,7 +106,6 @@
       "id": long,                           // ID товара в системе KazanExpress
       "title": string,                      // Название товара
       "category": Category,                 // Категория, в которой находится товар
-      "totalAvailableAmount": int,          // Остаток товара, доступного к покупке
       "description": string,                // Описание товара в формате HTML
       "attributes": string[],               // Краткие характеристики товара
       "photos": Photo[],                    // Фото товаров
