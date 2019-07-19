@@ -393,7 +393,7 @@ Content-Type: application/json
 Authorization: Bearer %TOKEN%
 
 {
-    "paymentId": 1551,
+    "paymentId": "bvkauqi214100092",
     "amount": 120.0,
     "orderId": 129709,
     "status": "confirmed"
@@ -408,7 +408,7 @@ Content-Type: application/json
 Authorization: Bearer %TOKEN%
 
 {
-    "paymentId": 1551,
+    "paymentId": "bvkauqi214100092",
     "orderId": 129709,
     "status": "canceled"
 }
