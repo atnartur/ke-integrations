@@ -28,6 +28,7 @@
 {
   "id": long,               // ID категории в системе KazanExpress
   "title": string,          // Название категории
+  "image" string,           // Ссылка на фото категории
   "children": Category[]    // Родительская категория 
 }
 ```
