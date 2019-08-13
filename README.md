@@ -327,7 +327,8 @@ Content-Type: application/json;charset=UTF-8
 {
     "status": {
         "code": 0,
-        "message": "Success"
+        "message": "Success",
+        "localizedMessage": "Успех"
     },
     "payload": {
         "orderId": 129709,
@@ -363,7 +364,8 @@ Content-Type: application/json;charset=UTF-8
 {
     "status": {
         "code": 11,
-        "message": "Some items from the order ran out of stock"
+        "message": "Some items from the order ran out of stock",
+        "localizedMessage": "Некоторые позиции из заказа закончились"
     },
     "payload": {
         "orderItems": [
@@ -452,7 +454,8 @@ Content-Type: application/json;charset=UTF-8
 {
     "status": {
         "code": 0,
-        "message": "Success"
+        "message": "Success",
+        "localizedMessage": "Успех"
     },
     "payload": null
 }
@@ -484,7 +487,8 @@ Content-Type: application/json;charset=UTF-8
 {
     "status": {
         "code": 0,
-        "message": "Success"
+        "message": "Success",
+        "localizedMessage": "Успех"
     },
     "payload": {
         "orderId": 129709,
@@ -516,3 +520,23 @@ Content-Type: application/json;charset=UTF-8
 * **DELIVERING** - доставляется до клиента
 * **DELIVERED** - доставлен до пункта выдачи KazanExpress
 * **COMPLETED** - выдан покупателю
+
+<a name="responses"></a>
+## Коды ответов
+
+code | причина 
+--- | ---  
+0 | Успешно выолненная операция
+1 | Внутренняя ошибка сервера
+2 | Неверно сформирован запрос
+10 | Запрашиваемый СКУ не найден
+11 | Несовпадение кол-ва СКУ
+12 | Сумма заказа не совпадает
+13 | Цена за СКУ не совпадает
+20 | Заказ не найден
+30 | Неправильная система оплаты для заказа
+31 | Статус/состояние платежа не совпадает
+32 | Ошибка обмена данными с банком
+33 | Неверный статус заказа
+34 | Невозможно отменить платеж
+
