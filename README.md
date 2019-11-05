@@ -184,7 +184,7 @@
                             "valueIndex": 0    // characteristics[0].values[0] = Лаванда
                         }
                     ],
-                    "amount": 2,
+                    "availableAmount": 2,
                     "price": 155
                 },
                 {
@@ -195,7 +195,7 @@
                             "valueIndex": 1    // characteristics[0].values[1] = Роза 
                         }
                     ],
-                    "amount": 3,
+                    "availableAmount": 3,
                     "price": 155
                 }
             ],
@@ -269,7 +269,7 @@ Authorization: Bearer %TOKEN%
         "phone": "9998887766"
     },
     "delivery": {
-        "type": "postmail",
+        "type": "post",
         "cityName": "Казань",
         "address": "ул. Туктамышева, д. 14, кв. 132",
         "zipCode": 462400
